@@ -105,3 +105,32 @@ export const HOME_SUBSCRIPTIONS: Subscription[] = [
         color: "#b8e8d0",
     },
 ];
+
+export const INSIGHTS_DATA = [
+    { day: "Mon", value: 35 },
+    { day: "Tue", value: 30 },
+    { day: "Wed", value: 22 },
+    { day: "Thr", value: 40, isHighlight: true },
+    { day: "Fri", value: 34 },
+    { day: "Sat", value: 20 },
+    { day: "Sun", value: 23 },
+];
+
+export const INSIGHTS_HISTORY = [
+    {
+        id: "claude-history",
+        icon: icons.claude,
+        name: "Claude",
+        startDate: "2025-06-25T12:00:00.000Z",
+        price: 9.84,
+        color: "#f5c542",
+    },
+    {
+        id: "canva-history",
+        icon: icons.canva,
+        name: "Canva",
+        startDate: "2025-06-30T16:00:00.000Z",
+        price: 43.89,
+        color: "#b8d4e3",
+    },
+];
