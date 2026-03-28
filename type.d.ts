@@ -34,6 +34,7 @@ declare global {
         onPress: () => void;
         onCancelPress?: () => void;
         isCancelling?: boolean;
+        isHomeScreen?: boolean;
     }
 
     interface UpcomingSubscription {
@@ -50,7 +51,8 @@ declare global {
 
     interface ListHeadingProps {
         title: string;
+        onPress?: () => void;
     }
 }
 
-export {};
+export { };

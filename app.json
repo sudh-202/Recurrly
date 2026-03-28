@@ -38,6 +38,24 @@
             "backgroundColor": "#000000"
           }
         }
+      ],
+    ["expo-font", {
+      "fonts": [
+        "./assets/fonts/PlusJakartaSans-Regular.ttf",
+        "./assets/fonts/PlusJakartaSans-Light.ttf",
+        "./assets/fonts/PlusJakartaSans-Medium.ttf",
+        "./assets/fonts/PlusJakartaSans-SemiBold.ttf",
+        "./assets/fonts/PlusJakartaSans-Bold.ttf",
+        "./assets/fonts/PlusJakartaSans-ExtraBold.ttf"
+      ]
+    }],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Recurly to access your photos so you can choose a profile image.",
+          "cameraPermission": "Allow Recurly to access your camera so you can capture a profile image.",
+          "microphonePermission": false
+        }
       ]
     ],
     "experiments": {

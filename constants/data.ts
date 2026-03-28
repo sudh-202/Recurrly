@@ -16,6 +16,29 @@ export const HOME_BALANCE = {
     nextRenewalDate: "2026-03-18T09:00:00.000Z",
 };
 
+export const PROFILE_AVATARS = [
+    {
+        id: "panda",
+        label: "Panda",
+        uri: "https://api.dicebear.com/9.x/adventurer/png?seed=PixelPanda&backgroundColor=b6e3f4",
+    },
+    {
+        id: "otter",
+        label: "Otter",
+        uri: "https://api.dicebear.com/9.x/adventurer/png?seed=HappyOtter&backgroundColor=c0aede",
+    },
+    {
+        id: "fox",
+        label: "Fox",
+        uri: "https://api.dicebear.com/9.x/adventurer/png?seed=JellyFox&backgroundColor=ffd5dc",
+    },
+    {
+        id: "koala",
+        label: "Koala",
+        uri: "https://api.dicebear.com/9.x/adventurer/png?seed=ChillKoala&backgroundColor=ffdfbf",
+    },
+] as const;
+
 export const UPCOMING_SUBSCRIPTIONS: UpcomingSubscription[] = [
     {
         id: "spotify",
@@ -103,5 +126,34 @@ export const HOME_SUBSCRIPTIONS: Subscription[] = [
         billing: "Yearly",
         renewalDate: "2026-04-02T10:00:00.000Z",
         color: "#b8e8d0",
+    },
+];
+
+export const INSIGHTS_DATA = [
+    { day: "Mon", value: 35 },
+    { day: "Tue", value: 30 },
+    { day: "Wed", value: 22 },
+    { day: "Thr", value: 40, isHighlight: true },
+    { day: "Fri", value: 34 },
+    { day: "Sat", value: 20 },
+    { day: "Sun", value: 23 },
+];
+
+export const INSIGHTS_HISTORY = [
+    {
+        id: "claude-history",
+        icon: icons.claude,
+        name: "Claude",
+        startDate: "2025-06-25T12:00:00.000Z",
+        price: 9.84,
+        color: "#f5c542",
+    },
+    {
+        id: "canva-history",
+        icon: icons.canva,
+        name: "Canva",
+        startDate: "2025-06-30T16:00:00.000Z",
+        price: 43.89,
+        color: "#b8d4e3",
     },
 ];
