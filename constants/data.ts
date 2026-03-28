@@ -16,6 +16,29 @@ export const HOME_BALANCE = {
     nextRenewalDate: "2026-03-18T09:00:00.000Z",
 };
 
+export const PROFILE_AVATARS = [
+    {
+        id: "panda",
+        label: "Panda",
+        uri: "https://api.dicebear.com/9.x/adventurer/png?seed=PixelPanda&backgroundColor=b6e3f4",
+    },
+    {
+        id: "otter",
+        label: "Otter",
+        uri: "https://api.dicebear.com/9.x/adventurer/png?seed=HappyOtter&backgroundColor=c0aede",
+    },
+    {
+        id: "fox",
+        label: "Fox",
+        uri: "https://api.dicebear.com/9.x/adventurer/png?seed=JellyFox&backgroundColor=ffd5dc",
+    },
+    {
+        id: "koala",
+        label: "Koala",
+        uri: "https://api.dicebear.com/9.x/adventurer/png?seed=ChillKoala&backgroundColor=ffdfbf",
+    },
+] as const;
+
 export const UPCOMING_SUBSCRIPTIONS: UpcomingSubscription[] = [
     {
         id: "spotify",

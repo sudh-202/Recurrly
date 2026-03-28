@@ -2,6 +2,8 @@ import { HOME_BALANCE, HOME_SUBSCRIPTIONS, UPCOMING_SUBSCRIPTIONS } from "@/cons
 import { icons } from "@/constants/icons";
 import images from "@/constants/images";
 import "@/global.css";
+import { getUserProfileImage } from "@/lib/utils";
+import { useUser } from "@clerk/expo";
 import { useRouter } from "expo-router";
 import { styled } from "nativewind";
 import React, { useState } from "react";
@@ -16,7 +18,13 @@ const SafeAreaView = styled(RNSafeAreaView);
 
 export default function App() {
   const router = useRouter();
+  const { user } = useUser();
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const profileImage = getUserProfileImage(user);
+
+  const displayName = user?.firstName 
+    ? `${user.firstName} ${user.lastName || ''}`.trim() 
+    : user?.emailAddresses[0]?.emailAddress || 'User';
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
@@ -27,8 +35,12 @@ export default function App() {
         {/* Header */}
         <View className="home-header">
           <View className="home-user">
-            <Image source={images.avatar} className="home-avatar" />
-            <Text className="home-user-name">Sudhanshu Bhai</Text>
+            {profileImage ? (
+              <Image source={{ uri: profileImage }} className="home-avatar" />
+            ) : (
+              <Image source={images.avatar} className="home-avatar" />
+            )}
+            <Text className="home-user-name">{displayName}</Text>
           </View>
           <TouchableOpacity>
             <Image source={icons.add} className="home-add-icon" />

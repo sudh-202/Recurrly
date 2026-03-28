@@ -48,7 +48,15 @@
         "./assets/fonts/PlusJakartaSans-Bold.ttf",
         "./assets/fonts/PlusJakartaSans-ExtraBold.ttf"
       ]
-    }]
+    }],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Recurly to access your photos so you can choose a profile image.",
+          "cameraPermission": "Allow Recurly to access your camera so you can capture a profile image.",
+          "microphonePermission": false
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
