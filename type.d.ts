@@ -27,12 +27,15 @@ declare global {
         frequency?: string;
         renewalDate?: string;
         color?: string;
+        manageUrl?: string;
+        planUrl?: string;
     }
 
     interface SubscriptionCardProps extends Omit<Subscription, "id"> {
         expanded: boolean;
         onPress: () => void;
         onCancelPress?: () => void;
+        onEditPress?: () => void;
         isCancelling?: boolean;
         isHomeScreen?: boolean;
     }
