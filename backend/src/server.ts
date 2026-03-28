@@ -77,9 +77,11 @@ app.patch('/api/subscriptions/:id', requireAuth, update);
 app.delete('/api/subscriptions/:id', requireAuth, remove);
 
 // ── Start ────────────────────────────────────────────────────
-app.listen(PORT, () => {
-  console.log(`🚀 Recurly API running on http://localhost:${PORT}`);
-  console.log(`📊 Health: http://localhost:${PORT}/health`);
-});
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`🚀 Recurly API running on http://localhost:${PORT}`);
+    console.log(`📊 Health: http://localhost:${PORT}/health`);
+  });
+}
 
 export default app;
