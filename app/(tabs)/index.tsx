@@ -2,10 +2,14 @@ import "@/global.css"
 import React from "react";
 import { Text, View } from "react-native";
 import { Link } from "expo-router";
+import { SafeAreaView as RNSafeAreaView} from "react-native-safe-area-context";
+import { styled } from "nativewind";
+
+const SafeAreaView = styled(RNSafeAreaView);
  
 export default function App() {
   return (
-    <View className="flex-1 items-center justify-center bg-background">
+    <SafeAreaView className="flex-1 items-center justify-center bg-background p-5 ">
       <Text className="text-xl font-bold text-success">
         Welcome to Nativewind!
       </Text>
@@ -24,6 +28,6 @@ export default function App() {
       <Link href={{pathname: "/subscriptions/[id]", params: {id: "netflix"}}} className="text-xl font-bold text-success bg-primary">
         Netflix
       </Link>
-    </View>
+    </SafeAreaView >
   );
 }
