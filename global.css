@@ -126,7 +126,7 @@
     }
 
     .upcoming-card {
-        @apply mr-4 w-44 rounded-2xl border border-black/10 bg-background p-4;
+        @apply mr-4 w-60 rounded-2xl border border-black/10 bg-background p-5;
     }
 
     .upcoming-row {
@@ -134,11 +134,15 @@
     }
 
     .upcoming-icon {
-        @apply size-14;
+        @apply size-12;
     }
 
     .upcoming-price {
-        @apply text-lg font-sans-bold text-primary;
+        @apply text-2xl font-sans-extrabold leading-none text-primary;
+    }
+
+    .upcoming-currency {
+        @apply text-2xl font-sans-extrabold leading-none text-primary;
     }
 
     .upcoming-meta {
@@ -146,7 +150,7 @@
     }
 
     .upcoming-name {
-        @apply mt-2 text-lg font-sans-bold text-primary;
+        @apply mt-2 text-base font-sans-bold text-primary;
     }
 
     .sub-card {

@@ -11,9 +11,12 @@ const UpcomingSubscriptionCard = ({
     <View className="upcoming-card">
       <View className="upcoming-row">
         <Image source={icon} className="upcoming-icon" resizeMode="contain" />
-        <View>
-          <Text className="upcoming-price">${price.toFixed(2)}</Text>
-          <Text className="upcoming-meta">{daysLeft} days left</Text>
+        <View className="flex-1">
+          <Text className="upcoming-price" numberOfLines={1}>
+            <Text className="upcoming-currency">₹</Text>
+            {price.toFixed(2)}
+          </Text>
+          <Text className="upcoming-meta" numberOfLines={1}>{daysLeft} days left</Text>
         </View>
       </View>
       <Text className="upcoming-name">{name}</Text>

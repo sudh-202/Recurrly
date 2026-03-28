@@ -1,5 +1,9 @@
 import React from 'react';
-import { Image, Text, TouchableOpacity, View } from 'react-native';
+import { Image, Linking, Text, TouchableOpacity, View } from 'react-native';
+
+const openUrl = (url?: string) => {
+  if (url) Linking.openURL(url).catch(() => {});
+};
 
 const SubscriptionCard = ({
   name,
@@ -10,37 +14,46 @@ const SubscriptionCard = ({
   onPress,
   plan,
   paymentMethod,
+  status,
   isCancelling,
   onCancelPress,
+  onEditPress,
   billing,
-  startDate,
+  manageUrl,
+  planUrl,
   isHomeScreen,
 }: SubscriptionCardProps) => {
-  // Use card color for unexpanded items in Subscriptions screen, otherwise use the specific color
   const bgColor = (isHomeScreen || expanded) ? color : undefined;
-  
+  const cancelLabel = status === 'cancelled' ? 'Restore' : 'Cancel';
+
   return (
-    <TouchableOpacity
-      onPress={onPress}
-      activeOpacity={0.8}
+    <View
       className={`sub-card ${expanded ? 'sub-card-expanded' : ''} ${!bgColor ? 'bg-card' : ''}`}
-      style={{ backgroundColor: bgColor, borderColor: bgColor ? "transparent" : undefined }}
+      style={{ backgroundColor: bgColor, borderColor: bgColor ? 'transparent' : undefined }}
     >
-      <View className="sub-head">
-        <View className="sub-main">
-          <Image source={icon} className="sub-icon" resizeMode="contain" />
-          <View className="sub-copy">
-            <Text className="sub-title">{name}</Text>
-            <Text className="sub-meta">
-              {isHomeScreen && !expanded ? (name === "Adobe Creative Cloud" ? "June 25, 12:00" : "June 05, 18:00") : plan}
+      <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
+        <View className="sub-head">
+          <View className="sub-main">
+            <View className="sub-icon items-center justify-center overflow-hidden rounded-2xl bg-card">
+              <Image source={icon} className="size-10" resizeMode="contain" />
+            </View>
+            <View className="sub-copy">
+              <Text className="sub-title">{name}</Text>
+              <Text className="sub-meta">
+                {isHomeScreen && !expanded
+                  ? billing === 'Yearly' ? 'Yearly plan' : 'Monthly plan'
+                  : plan ?? billing}
+              </Text>
+            </View>
+          </View>
+          <View className="sub-price-box">
+            <Text className="sub-price">₹{price.toFixed(2)}</Text>
+            <Text className="sub-billing">
+              {isHomeScreen && !expanded ? 'per month' : billing ?? '1 month'}
             </Text>
           </View>
         </View>
-        <View className="sub-price-box">
-          <Text className="sub-price">${price.toFixed(2)}</Text>
-          <Text className="sub-billing">{isHomeScreen && !expanded ? 'per month' : billing || '1 month'}</Text>
-        </View>
-      </View>
+      </TouchableOpacity>
 
       {expanded && (
         <View className="sub-body">
@@ -52,32 +65,50 @@ const SubscriptionCard = ({
                   {paymentMethod ? `*****${paymentMethod.slice(-4)}` : '*****8530'}
                 </Text>
               </View>
-              <TouchableOpacity className="list-action">
+              <TouchableOpacity
+                className="list-action"
+                onPress={() => openUrl(manageUrl)}
+              >
                 <Text className="list-action-text">Manage</Text>
               </TouchableOpacity>
             </View>
             <View className="sub-row">
               <View className="sub-row-copy">
                 <Text className="sub-label">Plan details:</Text>
-                <Text className="sub-value">{plan}</Text>
+                <Text className="sub-value">{plan ?? 'Standard Plan'}</Text>
               </View>
-              <TouchableOpacity className="list-action">
+              <TouchableOpacity
+                className="list-action"
+                onPress={() => openUrl(planUrl)}
+              >
                 <Text className="list-action-text">Change</Text>
               </TouchableOpacity>
             </View>
           </View>
-          <TouchableOpacity 
-            className={`sub-cancel ${isCancelling ? 'sub-cancel-disabled' : ''}`} 
-            onPress={onCancelPress} 
-            disabled={isCancelling}
-          >
-            <Text className="sub-cancel-text">
-              {isCancelling ? 'Cancelling...' : 'Cancel Subscription'}
-            </Text>
-          </TouchableOpacity>
+
+          {/* Edit / Cancel */}
+          <View className="flex-row gap-3">
+            {onEditPress && (
+              <TouchableOpacity
+                className="flex-1 items-center rounded-full border border-primary/30 bg-white/60 py-4"
+                onPress={onEditPress}
+              >
+                <Text className="font-sans-bold text-primary">Edit</Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity
+              className={`sub-cancel ${onEditPress ? 'flex-1' : ''} ${isCancelling ? 'sub-cancel-disabled' : ''}`}
+              onPress={onCancelPress}
+              disabled={isCancelling}
+            >
+              <Text className="sub-cancel-text">
+                {isCancelling ? 'Cancelling…' : cancelLabel}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
       )}
-    </TouchableOpacity>
+    </View>
   );
 };
 
