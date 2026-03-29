@@ -3,6 +3,7 @@ import clsx from 'clsx';
 import dayjs from 'dayjs';
 import React, { useState } from 'react';
 import {
+  ActivityIndicator,
   FlatList,
   Image,
   KeyboardAvoidingView,
@@ -49,7 +50,7 @@ const CATEGORY_COLORS: Record<Category, string> = {
 interface Props {
   visible: boolean;
   onClose: () => void;
-  onSubmit: (subscription: Subscription) => void;
+  onSubmit: (subscription: Omit<Subscription, 'id'>) => Promise<void>;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -66,6 +67,7 @@ const CreateSubscriptionModal = ({ visible, onClose, onSubmit }: Props) => {
   const [nameError, setNameError] = useState('');
   const [priceError, setPriceError] = useState('');
   const [suggestions, setSuggestions] = useState<typeof SUBSCRIPTION_CATALOG>([]);
+  const [submitting, setSubmitting] = useState(false);
 
   const resetForm = () => {
     setName('');
@@ -156,7 +158,7 @@ const CreateSubscriptionModal = ({ visible, onClose, onSubmit }: Props) => {
     return valid;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validate()) return;
 
     const now = dayjs();
@@ -176,8 +178,7 @@ const CreateSubscriptionModal = ({ visible, onClose, onSubmit }: Props) => {
         ? { uri: catalogEntry.logoUrl }
         : require('@/assets/icons/wallet.png');
 
-    const subscription: Subscription = {
-      id: `custom-${Date.now()}`,
+    const subscription: Omit<Subscription, 'id'> = {
       icon: resolvedIcon,
       name: name.trim(),
       plan: `${resolvedCategory} Plan`,
@@ -194,12 +195,17 @@ const CreateSubscriptionModal = ({ visible, onClose, onSubmit }: Props) => {
       planUrl: planUrl || catalogEntry?.planUrl,
     };
 
-    onSubmit(subscription);
-    resetForm();
-    onClose();
+    setSubmitting(true);
+    try {
+      await onSubmit(subscription);
+      resetForm();
+      onClose();
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const isDisabled = !name.trim() || !price.trim() || parseFloat(price) <= 0;
+  const isDisabled = !name.trim() || !price.trim() || parseFloat(price) <= 0 || submitting;
 
   return (
     <Modal
@@ -407,9 +413,13 @@ const CreateSubscriptionModal = ({ visible, onClose, onSubmit }: Props) => {
                   onPress={handleSubmit}
                   disabled={isDisabled}
                 >
-                  <Text className="text-lg font-sans-extrabold text-white">
-                    Add Subscription
-                  </Text>
+                  {submitting ? (
+                    <ActivityIndicator color="#fff" />
+                  ) : (
+                    <Text className="text-lg font-sans-extrabold text-white">
+                      Add Subscription
+                    </Text>
+                  )}
                 </TouchableOpacity>
               </View>
             </ScrollView>

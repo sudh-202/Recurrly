@@ -95,7 +95,7 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({
       const mapped: Subscription[] = data.map((row: any) => ({
         id: row.id,
         name: row.name,
-        icon: icons[row.category_slug as keyof typeof icons] ?? icons.wallet,
+        icon: row.icon_name && row.icon_name !== 'wallet' ? { uri: row.icon_name } : icons.wallet,
         category: row.category,
         color: row.category_color ?? CATEGORY_PALETTE[row.category] ?? '#d4d4d4',
         plan: row.plan,
@@ -170,7 +170,7 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({
       const mapped: Subscription = {
         id: created.id,
         name: created.name,
-        icon: icons[created.category_slug as keyof typeof icons] ?? icons.wallet,
+        icon: created.icon_name && created.icon_name !== 'wallet' ? { uri: created.icon_name } : icons.wallet,
         category: created.category,
         color: created.category_color ?? CATEGORY_PALETTE[created.category] ?? '#d4d4d4',
         plan: created.plan,
