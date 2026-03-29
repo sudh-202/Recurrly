@@ -1,4 +1,4 @@
-import { useSignIn } from '@clerk/expo';
+import { useSignIn } from '@clerk/expo/legacy';
 import { useRouter } from "expo-router";
 import { styled } from "nativewind";
 import React, { useState } from 'react';

@@ -1,11 +1,21 @@
-import { verifyJwt } from '@clerk/backend/jwt';
 import cors from 'cors';
 import 'dotenv/config';
 import express from 'express';
 import helmet from 'helmet';
+import { createRemoteJWKSet, jwtVerify } from 'jose';
 import morgan from 'morgan';
 import sql from './db/index.js';
 import { create, getOne, list, listCategories, remove, spendingSummary, update } from './routes/subscriptions.js';
+
+// Derive Clerk JWKS URL from publishable key
+function getClerkJwksUrl(publishableKey: string): string {
+  const encoded = publishableKey.replace(/^pk_(test|live)_/, '');
+  const domain = Buffer.from(encoded, 'base64').toString().replace(/\$$/, '');
+  return `https://${domain}/.well-known/jwks.json`;
+}
+
+const CLERK_PK = process.env.CLERK_PUBLISHABLE_KEY || process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
+const JWKS = createRemoteJWKSet(new URL(getClerkJwksUrl(CLERK_PK)));
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -31,16 +41,9 @@ async function requireAuth(req: express.Request, res: express.Response, next: ex
 
     const token = authHeader.slice(7);
 
-    const { payload } = await verifyJwt(token, {
-      key: process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY || process.env.CLERK_SECRET_KEY!,
-    });
+    const { payload } = await jwtVerify(token, JWKS);
 
-    if (!payload || typeof payload !== 'object') {
-      res.status(401).json({ error: 'Invalid token' });
-      return;
-    }
-
-    const clerkUserId = (payload as any).sub;
+    const clerkUserId = payload.sub;
 
     // Get or create local user
     const existing = await sql`SELECT id FROM users WHERE clerk_id = ${clerkUserId} LIMIT 1`;
