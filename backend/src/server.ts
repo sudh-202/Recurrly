@@ -50,9 +50,9 @@ async function requireAuth(req: express.Request, res: express.Response, next: ex
     }
 
     next();
-  } catch (err) {
-    console.error('Auth error:', err);
-    res.status(401).json({ error: 'Authentication failed' });
+  } catch (err: any) {
+    console.error('Auth error details:', err?.message, err?.code, err?.name);
+    res.status(401).json({ error: 'Authentication failed', detail: err?.message });
   }
 }
 
