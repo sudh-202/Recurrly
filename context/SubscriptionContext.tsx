@@ -4,10 +4,12 @@
  * Fetches from the Recurly backend API and syncs all changes.
  */
 
-import { HOME_SUBSCRIPTIONS, UPCOMING_SUBSCRIPTIONS } from '@/constants/data';
+import { UPCOMING_SUBSCRIPTIONS } from '@/constants/data';
 import { icons } from '@/constants/icons';
+import { useAuth } from '@clerk/expo';
 import dayjs from 'dayjs';
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import * as React from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -70,14 +72,22 @@ const SubscriptionContext = createContext<SubscriptionContextValue | null>(null)
 export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [subscriptions, setSubscriptions] = useState<Subscription[]>(HOME_SUBSCRIPTIONS);
+  const { getToken } = useAuth();
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   // Fetch subscriptions from the backend
   const fetchSubscriptions = useCallback(async () => {
     try {
-      const res = await fetch(`${API_URL}/api/subscriptions`);
+      const token = await getToken();
+      if (!token) return; // Wait until authenticated
+      
+      const res = await fetch(`${API_URL}/api/subscriptions`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
 
@@ -85,9 +95,8 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({
       const mapped: Subscription[] = data.map((row: any) => ({
         id: row.id,
         name: row.name,
-        icon: icons[row.category_slug as keyof typeof icons] ?? icons.other,
+        icon: icons[row.category_slug as keyof typeof icons] ?? icons.wallet,
         category: row.category,
-        category_slug: row.category_slug,
         color: row.category_color ?? CATEGORY_PALETTE[row.category] ?? '#d4d4d4',
         plan: row.plan,
         billing: row.billing,
@@ -103,13 +112,14 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({
       setSubscriptions(mapped);
       setError(null);
     } catch (err) {
-      console.warn('Failed to fetch from API, using static data:', err);
+      console.warn('Failed to fetch from API:', err);
       setError('Using offline data');
-      setSubscriptions(HOME_SUBSCRIPTIONS);
+      // On error, we keep whatever subscriptions we have (or empty)
+      // We removed the HOME_SUBSCRIPTIONS fallback to avoid pre-rendered data for new users
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [getToken]);
 
   useEffect(() => {
     fetchSubscriptions();
@@ -117,9 +127,13 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const addSubscription = useCallback(async (sub: Omit<Subscription, 'id'>) => {
     try {
+      const token = await getToken();
       const res = await fetch(`${API_URL}/api/subscriptions`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify(sub),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -127,9 +141,8 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({
       const mapped: Subscription = {
         id: created.id,
         name: created.name,
-        icon: icons[created.category_slug as keyof typeof icons] ?? icons.other,
+        icon: icons[created.category_slug as keyof typeof icons] ?? icons.wallet,
         category: created.category,
-        category_slug: created.category_slug,
         color: created.category_color ?? CATEGORY_PALETTE[created.category] ?? '#d4d4d4',
         plan: created.plan,
         billing: created.billing,
@@ -146,13 +159,17 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({
       console.error('addSubscription failed:', err);
       throw err;
     }
-  }, []);
+  }, [getToken]);
 
   const updateSubscription = useCallback(async (updated: Subscription) => {
     try {
+      const token = await getToken();
       const res = await fetch(`${API_URL}/api/subscriptions/${updated.id}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify(updated),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -163,12 +180,16 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({
       console.error('updateSubscription failed:', err);
       throw err;
     }
-  }, []);
+  }, [getToken]);
 
   const removeSubscription = useCallback(async (id: string) => {
     try {
+      const token = await getToken();
       const res = await fetch(`${API_URL}/api/subscriptions/${id}`, {
         method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       setSubscriptions((prev) => prev.filter((s) => s.id !== id));

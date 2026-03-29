@@ -1,6 +1,6 @@
 import { PROFILE_AVATARS } from '@/constants/data';
 import { useClerk } from '@clerk/expo';
-import { useSignUp } from '@clerk/expo/legacy';
+import { useSignUp } from '@clerk/expo';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from "expo-router";
 import { styled } from "nativewind";
