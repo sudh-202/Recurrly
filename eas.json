@@ -6,17 +6,20 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "channel": "development"
     },
     "preview": {
       "distribution": "internal",
       "env": {
         "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_test_Z2VudGxlLXNhaWxmaXNoLTcyLmNsZXJrLmFjY291bnRzLmRldiQ",
         "EXPO_PUBLIC_API_URL": "https://recurrly.vercel.app"
-      }
+      },
+      "channel": "preview"
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "channel": "production"
     }
   },
   "submit": {

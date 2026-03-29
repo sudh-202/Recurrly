@@ -86,6 +86,12 @@
         "projectId": "5d151bbf-0086-4f91-bf18-2f425e6d5c42"
       }
     },
-    "owner": "deep-nights-organization"
+    "owner": "deep-nights-organization",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/5d151bbf-0086-4f91-bf18-2f425e6d5c42"
+    }
   }
 }

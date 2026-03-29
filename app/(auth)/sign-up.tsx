@@ -1,6 +1,7 @@
 import { PROFILE_AVATARS } from '@/constants/data';
 import { useClerk } from '@clerk/expo';
 import { useSignUp } from '@clerk/expo/legacy';
+import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from "expo-router";
 import { styled } from "nativewind";
@@ -22,6 +23,7 @@ const SignUp = () => {
   const [pendingVerification, setPendingVerification] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [selectedAvatarUrl, setSelectedAvatarUrl] = useState<string | null>(null);
   const [uploadedAvatarUri, setUploadedAvatarUri] = useState<string | null>(null);
   const [uploadedAvatarDataUri, setUploadedAvatarDataUri] = useState<string | null>(null);
@@ -156,6 +158,7 @@ const SignUp = () => {
                   <Text className="text-sm font-sans-bold text-primary mb-2">Verification Code</Text>
                   <TextInput
                     className="bg-[#fdfaf5] border border-black/5 rounded-2xl px-4 py-4 text-base font-sans-medium"
+                    style={{ color: '#081126' }}
                     placeholder="Enter 6-digit code"
                     placeholderTextColor="#999"
                     value={code}
@@ -254,8 +257,9 @@ const SignUp = () => {
                 <Text className="text-base font-sans-bold text-primary mb-2">Full Name</Text>
                 <TextInput
                   className="bg-transparent border border-black/10 rounded-2xl px-4 py-4 text-base font-sans-medium"
+                  style={{ color: '#081126' }}
                   placeholder="Enter your name"
-                  placeholderTextColor="#666"
+                  placeholderTextColor="#999"
                   value={firstName}
                   onChangeText={setFirstName}
                   autoCapitalize="words"
@@ -266,8 +270,9 @@ const SignUp = () => {
                 <Text className="text-base font-sans-bold text-primary mb-2">Email</Text>
                 <TextInput
                   className="bg-transparent border border-black/10 rounded-2xl px-4 py-4 text-base font-sans-medium"
+                  style={{ color: '#081126' }}
                   placeholder="Enter your email"
-                  placeholderTextColor="#666"
+                  placeholderTextColor="#999"
                   value={emailAddress}
                   onChangeText={setEmailAddress}
                   keyboardType="email-address"
@@ -277,14 +282,20 @@ const SignUp = () => {
 
               <View>
                 <Text className="text-base font-sans-bold text-primary mb-2">Password</Text>
-                <TextInput
-                  className="bg-transparent border border-black/10 rounded-2xl px-4 py-4 text-base font-sans-medium"
-                  placeholder="Enter your password"
-                  placeholderTextColor="#666"
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry
-                />
+                <View className="flex-row items-center border border-black/10 rounded-2xl px-4 bg-transparent">
+                  <TextInput
+                    className="flex-1 py-4 text-base font-sans-medium"
+                    style={{ color: '#081126' }}
+                    placeholder="Enter your password"
+                    placeholderTextColor="#999"
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry={!showPassword}
+                  />
+                  <TouchableOpacity onPress={() => setShowPassword(v => !v)} className="pl-2">
+                    <Ionicons name={showPassword ? 'eye-off' : 'eye'} size={20} color="#999" />
+                  </TouchableOpacity>
+                </View>
               </View>
 
               {errorMsg ? (
