@@ -11,8 +11,8 @@ import { getUserProfileImage } from "@/lib/utils";
 import { useUser } from "@clerk/expo";
 import { useRouter } from "expo-router";
 import { styled } from "nativewind";
-import React, { useState } from "react";
-import { Alert, Image, Pressable, ScrollView, Text, View } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { Alert, Animated, Image, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 
 const SafeAreaView = styled(RNSafeAreaView);
@@ -27,7 +27,29 @@ export default function HomeScreen() {
     removeSubscription,
     totalMonthly,
     upcomingCards,
+    loading,
   } = useSubscriptions();
+
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+  const fadeAnim = useRef(new Animated.Value(0.6)).current;
+
+  useEffect(() => {
+    if (!loading) return;
+    const pulse = Animated.loop(
+      Animated.sequence([
+        Animated.parallel([
+          Animated.timing(pulseAnim, { toValue: 1.18, duration: 900, useNativeDriver: true }),
+          Animated.timing(fadeAnim, { toValue: 1, duration: 900, useNativeDriver: true }),
+        ]),
+        Animated.parallel([
+          Animated.timing(pulseAnim, { toValue: 1, duration: 900, useNativeDriver: true }),
+          Animated.timing(fadeAnim, { toValue: 0.6, duration: 900, useNativeDriver: true }),
+        ]),
+      ])
+    );
+    pulse.start();
+    return () => pulse.stop();
+  }, [loading]);
 
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [createVisible, setCreateVisible] = useState(false);
@@ -58,6 +80,21 @@ export default function HomeScreen() {
       ]
     );
   };
+
+  if (loading) {
+    return (
+      <SafeAreaView className="flex-1 bg-background items-center justify-center" edges={["top"]}>
+        <Animated.Image
+          source={require('@/assets/images/logo-glow.png')}
+          style={{ width: 140, height: 140, transform: [{ scale: pulseAnim }], opacity: fadeAnim }}
+          resizeMode="contain"
+        />
+        <Text className="mt-8 text-sm font-sans-medium text-primary/40 tracking-widest uppercase">
+          Loading
+        </Text>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
