@@ -32,7 +32,7 @@ async function requireAuth(req: express.Request, res: express.Response, next: ex
     const token = authHeader.slice(7);
 
     const { payload } = await verifyJwt(token, {
-      key: process.env.CLERK_SECRET_KEY!,
+      key: process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY || process.env.CLERK_SECRET_KEY!,
     });
 
     if (!payload || typeof payload !== 'object') {
