@@ -1,114 +1,210 @@
-# Recurrly - Subscription Management Made Simple
+# Recurrly
 
-Recurrly is a subscription management mobile app built with React Native, Expo, and NativeWind. Track recurring expenses, billing cycles, and spending habits.
-
-## Tech Stack
-
-- **Frontend**: Expo / React Native + NativeWind (Tailwind)
-- **Auth**: Clerk (`@clerk/expo`)
-- **Backend**: Express + TypeScript, deployed on Vercel
-- **Database**: Neon (serverless Postgres)
-- **Build & Updates**: EAS Build + EAS Update
+> Subscription management made simple — track, visualize, and control your recurring expenses.
 
 ---
 
-## Dev Workflow (Day-to-Day)
+## Table of Contents
 
-### 1. Start local development
+- [Run Locally](#run-locally)
+- [Build APK](#build-apk)
+- [Push Updates to Users](#push-updates-to-users)
+- [Backend](#backend)
+- [Git Workflow](#git-workflow)
+- [When to Rebuild vs Update](#when-to-rebuild-vs-update)
+- [Environment Variables](#environment-variables)
+- [Project Structure](#project-structure)
+- [Common Issues](#common-issues)
+
+---
+
+## Run Locally
+
+Run the app on your phone during development — no build needed.
+
+**Step 1** — Install dependencies
+
+```bash
+npm install
+```
+
+**Step 2** — Start Metro bundler
 
 ```bash
 npx expo start --clear
 ```
 
-Scan the QR code with Expo Go on your phone. Metro will hot-reload on every save.
+**Step 3** — Open on your phone
 
-### 2. Push OTA update to users (JS/UI changes only)
+1. Download **Expo Go** from the App Store / Play Store
+2. Scan the QR code shown in your terminal
+3. The app loads on your phone instantly
 
-No APK reinstall needed. Users get it automatically on next app open.
+> Changes you make in code appear on your phone automatically (hot reload). No restart needed for most edits.
+
+---
+
+## Build APK
+
+Build a standalone APK that users can install — hosted on Expo's cloud.
+
+**Step 1** — Login to EAS
 
 ```bash
-eas update --branch production --message "what you changed"
+eas login
 ```
 
-### 3. Full rebuild required when you change
-
-- Native modules (camera, notifications, etc.)
-- Permissions in `app.json`
-- Expo SDK version
-- `eas.json` build config
+**Step 2** — Build
 
 ```bash
+# Android APK (recommended for sharing/testing)
 eas build --platform android --profile preview
-# Share the QR code from EAS dashboard — users download once
+
+# iOS (requires Apple Developer account)
+eas build --platform ios --profile preview
+```
+
+**Step 3** — Share with users
+
+- Go to [expo.dev](https://expo.dev) → your project → Builds
+- Share the QR code or download link
+- Users scan the QR → download and install the APK
+
+> Users only need to download the APK **once**. Future JS/UI updates are pushed silently via OTA (see below).
+
+---
+
+## Push Updates to Users
+
+After the APK is installed, push code changes to all users **without a new download**.
+
+```bash
+eas update --branch production --message "what changed"
+```
+
+**That's it.** Users get the update automatically the next time they open the app.
+
+### What this looks like for users
+
+```
+User opens app
+  └── App checks for update in background
+        └── New update found → downloads silently
+              └── Next app open → updated version runs
+```
+
+### Examples
+
+```bash
+# After fixing a bug
+eas update --branch production --message "fix: sign in button"
+
+# After adding a new feature
+eas update --branch production --message "feat: forgot password flow"
+
+# After UI changes
+eas update --branch production --message "ui: dark input text, eye icon on password"
 ```
 
 ---
 
-## Backend (Vercel)
+## Backend
 
-The backend lives in `backend/`. It's an Express API deployed as a Vercel serverless function.
+The backend is an Express API deployed as a Vercel serverless function.
 
-### Run locally
+### Run backend locally
 
 ```bash
 cd backend
 npm run dev
-# Runs on http://localhost:3001
+# Running at http://localhost:3001
 ```
 
-### Deploy to Vercel
+### Deploy backend
 
-Just push to `main` — Vercel auto-deploys.
+Just push to `main` — Vercel deploys automatically.
 
 ```bash
-git add .
-git commit -m "your message"
 git push origin main
 ```
 
-Health check: `https://recurrly.vercel.app/health`
+**Verify deployment:**
 
-### Vercel environment variables (set in Vercel dashboard)
+```bash
+curl https://recurrly.vercel.app/health
+# Expected: {"status":"ok","timestamp":"..."}
+```
 
-| Variable | Description |
+### Vercel environment variables
+
+Set these in the [Vercel dashboard](https://vercel.com) under your project → Settings → Environment Variables.
+
+| Variable | Value |
 |---|---|
 | `DATABASE_URL` | Neon Postgres connection string |
-| `EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk publishable key |
+| `EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk publishable key (`pk_test_...`) |
 
 ---
 
 ## Git Workflow
 
-Always work on `dev`, then merge to `main` to trigger Vercel deploy.
+```
+dev branch  →  your daily work
+main branch →  triggers Vercel backend deploy
+```
+
+**Daily development**
 
 ```bash
-# Work on dev
 git checkout dev
-# ... make changes ...
-git add .
-git commit -m "feature: description"
-git push origin dev
 
-# Merge to main to deploy backend
+# make your changes...
+
+git add .
+git commit -m "feat: your feature"
+git push origin dev
+```
+
+**Deploy backend to production**
+
+```bash
 git checkout main
 git pull origin main
 git merge dev
 git push origin main
+# Vercel auto-deploys in ~30 seconds
 ```
+
+---
+
+## When to Rebuild vs Update
+
+| Change type | Action needed |
+|---|---|
+| UI changes, new screens, bug fixes | `eas update` — no reinstall |
+| New JS-only npm packages | `eas update` — no reinstall |
+| New native module (camera, notifications) | `eas build` — new APK |
+| Permissions changed in `app.json` | `eas build` — new APK |
+| App icon / splash screen changed | `eas build` — new APK |
+| Expo SDK version bump | `eas build` — new APK |
+
+> **Rule of thumb:** If you only touched `.tsx` / `.ts` / `.css` files → `eas update` is enough.
 
 ---
 
 ## Environment Variables
 
-**Root `.env`** (Expo app):
-```
+**`.env`** — Expo app (root)
+
+```bash
 EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
 EXPO_PUBLIC_API_URL=https://recurrly.vercel.app
 DATABASE_URL=postgres://...
 ```
 
-**`backend/.env`** (local backend dev):
-```
+**`backend/.env`** — Backend (local dev only)
+
+```bash
 DATABASE_URL=postgres://...
 CLERK_PUBLISHABLE_KEY=pk_test_...
 PORT=3001
@@ -120,40 +216,74 @@ PORT=3001
 
 ```
 recurrly/
+│
 ├── app/
-│   ├── (auth)/          # Sign in, Sign up screens
-│   ├── (tabs)/          # Main app tabs
-│   ├── _layout.tsx      # Root layout + ClerkProvider
-│   └── index.tsx        # Auth redirect logic
+│   ├── (auth)/
+│   │   ├── _layout.tsx        auth route guard
+│   │   ├── sign-in.tsx        sign in + forgot password
+│   │   └── sign-up.tsx        sign up + email verification
+│   ├── (tabs)/                main app screens
+│   ├── _layout.tsx            root layout, ClerkProvider
+│   ├── index.tsx              auth redirect
+│   └── onboarding.tsx         first-time screen
+│
 ├── backend/
 │   ├── src/
-│   │   ├── server.ts    # Express app + JWT auth middleware
-│   │   ├── routes/      # API route handlers
-│   │   └── db/          # Neon DB client
+│   │   ├── server.ts          Express app + JWT middleware
+│   │   ├── routes/
+│   │   │   └── subscriptions.ts   CRUD API handlers
+│   │   └── db/
+│   │       └── index.ts       Neon DB client
 │   └── api/
-│       └── index.ts     # Vercel serverless entry point
+│       └── index.ts           Vercel serverless entry
+│
 ├── context/
-│   └── SubscriptionContext.tsx  # Global subscription state
-├── constants/           # Icons, data, theme
-├── assets/              # Fonts, images
-└── vercel.json          # Points Vercel to backend/api/index.ts
+│   └── SubscriptionContext.tsx    global subscription state
+│
+├── constants/                 icons, data, theme
+├── assets/                    fonts, images
+├── global.css                 NativeWind / Tailwind config
+└── vercel.json                Vercel → backend/api/index.ts
 ```
 
 ---
 
-## Common Issues & Fixes
+## Common Issues
 
-**Sign in / Sign up buttons not responding**
-→ Make sure `useSignIn` and `useSignUp` are imported from `@clerk/expo/legacy`, not `@clerk/expo`. The v3 API is incompatible with this codebase.
+**Buttons on sign in / sign up don't respond**
 
-**Backend returning 404 on Vercel**
-→ Check that `vercel.json` exists at the repo root (not just in `backend/`) and points to `backend/api/index.ts`.
+```
+Cause: @clerk/expo v3 has a breaking API change
+Fix:   useSignIn and useSignUp must be imported from @clerk/expo/legacy
+```
 
-**Backend returning 500 / `ERR_REQUIRE_ESM`**
-→ `jose` must stay at v4. v6 is ESM-only and breaks Vercel's CommonJS compilation.
+**Backend returns 404 on Vercel**
 
-**Pushed to `dev` but Vercel didn't redeploy**
-→ Vercel only deploys from `main`. Merge `dev` → `main` and push.
+```
+Cause: vercel.json missing at repo root (only existed in backend/)
+Fix:   Create vercel.json at root pointing to backend/api/index.ts
+```
+
+**Backend returns 500 / ERR_REQUIRE_ESM**
+
+```
+Cause: jose v6 is ESM-only, Vercel compiles as CommonJS
+Fix:   jose must stay at v4 — do not upgrade
+```
+
+**Pushed changes but Vercel didn't redeploy**
+
+```
+Cause: Vercel only watches the main branch
+Fix:   Merge dev into main and push main
+```
+
+**Users not getting OTA update**
+
+```
+Cause: eas update wasn't run, or wrong branch used
+Fix:   eas update --branch production --message "..."
+```
 
 ---
 
