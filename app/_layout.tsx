@@ -1,19 +1,39 @@
-import { Stack } from "expo-router";
-import "@/global.css";
-import React from "react";
-import { useFonts } from "expo-font";
-import { useEffect } from "react";
-import * as SplashScreen from "expo-splash-screen";
-import { ClerkProvider } from '@clerk/expo'
-import { tokenCache } from '@clerk/expo/token-cache'
-import { Slot } from 'expo-router'
 import { SubscriptionProvider } from '@/context/SubscriptionContext';
+import "@/global.css";
+import { ClerkProvider } from '@clerk/expo';
+import { useFonts } from "expo-font";
+import { Stack } from "expo-router";
+import * as SecureStore from 'expo-secure-store';
+import * as SplashScreen from "expo-splash-screen";
+import React, { useEffect } from "react";
 
-const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!
-
-if (!publishableKey) {
-  throw new Error('Add your Clerk Publishable Key to the .env file')
+const tokenCache = {
+  async getToken(key: string) {
+    try {
+      const item = await SecureStore.getItemAsync(key)
+      if (item) {
+        console.log(`${key} was used 🔐 \n`)
+      } else {
+        console.log('No values stored under key: ' + key)
+      }
+      return item
+    } catch (error) {
+      console.error('SecureStore get item error: ', error)
+      await SecureStore.deleteItemAsync(key)
+      return null
+    }
+  },
+  async saveToken(key: string, value: string) {
+    try {
+      return SecureStore.setItemAsync(key, value)
+    } catch (err) {
+      return
+    }
+  },
 }
+
+// Provide a hardcoded fallback ONLY if the build system completely stripped the env var
+const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY || "pk_test_Z2VudGxlLXNhaWxmaXNoLTcyLmNsZXJrLmFjY291bnRzLmRldiQ";
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
