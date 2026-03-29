@@ -4,7 +4,6 @@
  * Fetches from the Recurly backend API and syncs all changes.
  */
 
-import { UPCOMING_SUBSCRIPTIONS } from '@/constants/data';
 import { icons } from '@/constants/icons';
 import { useAuth } from '@clerk/expo';
 import dayjs from 'dayjs';
@@ -29,7 +28,7 @@ export interface SubscriptionContextValue {
   totalYearly: number;
   upcomingRenewals: Subscription[];
   categorySpending: CategorySpend[];
-  upcomingCards: typeof UPCOMING_SUBSCRIPTIONS;
+  upcomingCards: UpcomingSubscription[];
   loading: boolean;
   error: string | null;
 }
@@ -232,18 +231,15 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({
     return Object.values(map).sort((a, b) => b.monthly - a.monthly);
   }, [subscriptions]);
 
-  const upcomingCards = useMemo(() => {
-    if (upcomingRenewals.length > 0) {
-      return upcomingRenewals.slice(0, 3).map((s) => ({
-        id: s.id,
-        icon: s.icon,
-        name: s.name,
-        price: toMonthly(s),
-        currency: s.currency ?? 'INR',
-        daysLeft: Math.max(1, dayjs(s.renewalDate).diff(dayjs(), 'day')),
-      }));
-    }
-    return UPCOMING_SUBSCRIPTIONS;
+  const upcomingCards = useMemo<UpcomingSubscription[]>(() => {
+    return upcomingRenewals.slice(0, 3).map((s) => ({
+      id: s.id,
+      icon: s.icon,
+      name: s.name,
+      price: toMonthly(s),
+      currency: s.currency ?? 'INR',
+      daysLeft: Math.max(1, dayjs(s.renewalDate).diff(dayjs(), 'day')),
+    }));
   }, [upcomingRenewals]);
 
   return (

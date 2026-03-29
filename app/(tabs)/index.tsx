@@ -92,17 +92,23 @@ export default function HomeScreen() {
         </View>
 
         {/* Upcoming Section — real upcoming renewals */}
-        <ListHeading title="Upcoming" onPress={() => router.push('/(tabs)/subscriptions')} />
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          className="mb-2"
-          contentContainerStyle={{ paddingRight: 20 }}
-        >
-          {upcomingCards.map((sub) => (
-            <UpcomingSubscriptionCard key={sub.id} {...sub} />
-          ))}
-        </ScrollView>
+        <ListHeading title="Upcoming Renewals" onPress={() => router.push('/(tabs)/subscriptions')} />
+        {upcomingCards.length === 0 ? (
+          <View className="mb-4 rounded-2xl border border-black/10 bg-card px-5 py-6 items-center">
+            <Text className="text-base font-sans-bold text-primary/40">No renewals in the next 30 days</Text>
+          </View>
+        ) : (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            className="mb-2"
+            contentContainerStyle={{ paddingRight: 20 }}
+          >
+            {upcomingCards.map((sub) => (
+              <UpcomingSubscriptionCard key={sub.id} {...sub} />
+            ))}
+          </ScrollView>
+        )}
 
         {/* All Subscriptions */}
         <ListHeading
