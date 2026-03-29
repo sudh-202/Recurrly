@@ -5,7 +5,7 @@
  */
 
 import { icons } from '@/constants/icons';
-import { useAuth } from '@clerk/expo';
+import { useAuth, useSession } from '@clerk/expo';
 import dayjs from 'dayjs';
 import * as React from 'react';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -71,7 +71,8 @@ const SubscriptionContext = createContext<SubscriptionContextValue | null>(null)
 export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const { getToken } = useAuth();
+  const { session } = useSession();
+  const { userId } = useAuth();
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -79,7 +80,7 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({
   // Fetch subscriptions from the backend
   const fetchSubscriptions = useCallback(async () => {
     try {
-      const token = await getToken();
+      const token = await session?.getToken();
       if (!token) return; // Wait until authenticated
       
       const res = await fetch(`${API_URL}/api/subscriptions`, {
@@ -118,15 +119,18 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({
     } finally {
       setLoading(false);
     }
-  }, [getToken]);
+  }, [session]);
 
   useEffect(() => {
-    fetchSubscriptions();
-  }, [fetchSubscriptions]);
+    if (userId) {
+      fetchSubscriptions();
+    }
+  }, [userId, fetchSubscriptions]);
 
   const addSubscription = useCallback(async (sub: Omit<Subscription, 'id'>) => {
     try {
-      const token = await getToken();
+      const token = await session?.getToken();
+      console.log('addSubscription token type:', typeof token, 'value:', token ? token.substring(0, 30) + '...' : token);
 
       // Extract icon URL string from ImageSourcePropType
       const iconName =
@@ -157,7 +161,11 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({
         },
         body: JSON.stringify(payload),
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        console.error('addSubscription API error:', res.status, body);
+        throw new Error(`HTTP ${res.status}: ${(body as any).detail || (body as any).error || ''}`);
+      }
       const created: any = await res.json();
       const mapped: Subscription = {
         id: created.id,
@@ -180,11 +188,11 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({
       console.error('addSubscription failed:', err);
       throw err;
     }
-  }, [getToken]);
+  }, [session]);
 
   const updateSubscription = useCallback(async (updated: Subscription) => {
     try {
-      const token = await getToken();
+      const token = await session?.getToken();
       const res = await fetch(`${API_URL}/api/subscriptions/${updated.id}`, {
         method: 'PATCH',
         headers: { 
@@ -201,11 +209,11 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({
       console.error('updateSubscription failed:', err);
       throw err;
     }
-  }, [getToken]);
+  }, [session]);
 
   const removeSubscription = useCallback(async (id: string) => {
     try {
-      const token = await getToken();
+      const token = await session?.getToken();
       const res = await fetch(`${API_URL}/api/subscriptions/${id}`, {
         method: 'DELETE',
         headers: {
@@ -218,7 +226,7 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({
       console.error('removeSubscription failed:', err);
       throw err;
     }
-  }, []);
+  }, [session]);
 
   // ── Computed values ─────────────────────────────────────────────────────────
 
