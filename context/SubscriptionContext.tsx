@@ -127,13 +127,35 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({
   const addSubscription = useCallback(async (sub: Omit<Subscription, 'id'>) => {
     try {
       const token = await getToken();
+
+      // Extract icon URL string from ImageSourcePropType
+      const iconName =
+        sub.icon && typeof sub.icon === 'object' && 'uri' in sub.icon
+          ? (sub.icon as { uri: string }).uri
+          : 'wallet';
+
+      // Transform camelCase Subscription → snake_case backend payload
+      const payload = {
+        name: sub.name,
+        icon_name: iconName,
+        category: sub.category,
+        plan: sub.plan,
+        billing: sub.billing,
+        price: sub.price,
+        currency: sub.currency ?? 'INR',
+        renewal_date: sub.renewalDate,
+        start_date: sub.startDate,
+        manage_url: sub.manageUrl,
+        plan_url: sub.planUrl,
+      };
+
       const res = await fetch(`${API_URL}/api/subscriptions`, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(sub),
+        body: JSON.stringify(payload),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const created: any = await res.json();

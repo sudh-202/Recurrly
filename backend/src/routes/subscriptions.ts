@@ -66,13 +66,25 @@ export async function create(req: Request, res: Response) {
   try {
     const userId = (req as any).localUserId;
     const {
-      name, icon_name, category_id, plan, billing,
+      name, icon_name, plan, billing,
       price, currency, renewal_date, start_date,
       manage_url, plan_url,
     } = req.body as SubscriptionInput;
 
-    if (!name || !category_id || price == null || !renewal_date) {
-      res.status(400).json({ error: 'Missing required fields: name, category_id, price, renewal_date' });
+    // Accept either category_id (UUID) or category (name string)
+    let resolvedCategoryId: string = req.body.category_id;
+    if (!resolvedCategoryId && req.body.category) {
+      const catRow = await sql`SELECT id FROM categories WHERE LOWER(name) = LOWER(${req.body.category}) LIMIT 1`;
+      if (catRow.length > 0) {
+        resolvedCategoryId = catRow[0].id;
+      } else {
+        const fallback = await sql`SELECT id FROM categories WHERE name = 'Other' LIMIT 1`;
+        resolvedCategoryId = fallback[0]?.id;
+      }
+    }
+
+    if (!name || !resolvedCategoryId || price == null || !renewal_date) {
+      res.status(400).json({ error: 'Missing required fields: name, category or category_id, price, renewal_date' });
       return;
     }
 
@@ -81,7 +93,7 @@ export async function create(req: Request, res: Response) {
         user_id, name, icon_name, category_id, plan, billing,
         price, currency, renewal_date, start_date, manage_url, plan_url
       ) VALUES (
-        ${userId}, ${name}, ${icon_name}, ${category_id}, ${plan ?? 'Monthly'}, ${billing ?? 'Monthly'},
+        ${userId}, ${name}, ${icon_name ?? 'wallet'}, ${resolvedCategoryId}, ${plan ?? 'Monthly'}, ${billing ?? 'Monthly'},
         ${price}, ${currency ?? 'INR'}, ${new Date(renewal_date).toISOString()},
         ${start_date ? new Date(start_date).toISOString() : null},
         ${manage_url ?? null}, ${plan_url ?? null}
